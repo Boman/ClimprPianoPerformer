@@ -1,3 +1,8 @@
 <resources>
+
     <string name="app_name">ClimprPianoPerformer</string>
+    <string name="title_activity_choose_song">ClimprPianoPerformer</string>
+    <string name="title_activity_piano">PianoActivity</string>
+    <string name="search">Search</string>
+
 </resources>
