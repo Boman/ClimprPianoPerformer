@@ -1,7 +1,5 @@
 package org.climpr.pianoperformer.gui;
 
-import java.util.Vector;
-
 import org.climpr.pianoperformer.Note;
 import org.climpr.pianoperformer.PianoActivity;
 import org.climpr.pianoperformer.R;
@@ -33,11 +31,11 @@ public class NoteRoll extends SurfaceView implements SurfaceHolder.Callback {
 
 	private int rollHeight;
 
-	private Vector<int[]> notes;
-
 	private final int NUM_KEYS;
 	private final int NUM_WHITE_KEYS;
 	private final int KEY_NOTE_OFFSET;
+
+	private double pulsesPerPixel;
 
 	public NoteRoll(Context context) {
 		super(context);
@@ -53,11 +51,11 @@ public class NoteRoll extends SurfaceView implements SurfaceHolder.Callback {
 		shade1 = Color.rgb(210, 205, 220);
 		shade2 = Color.rgb(150, 200, 220);
 
+		pulsesPerPixel = 5;
+
 		NUM_KEYS = 88;
 		NUM_WHITE_KEYS = 52;
 		KEY_NOTE_OFFSET = 21;
-
-		notes = new Vector<int[]>();
 
 		SurfaceHolder holder = getHolder();
 		holder.addCallback(this);
@@ -81,6 +79,10 @@ public class NoteRoll extends SurfaceView implements SurfaceHolder.Callback {
 		bufferBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 		bufferCanvas = new Canvas(bufferBitmap);
 		this.invalidate();
+		draw();
+	}
+
+	public void update() {
 		draw();
 	}
 
@@ -125,23 +127,28 @@ public class NoteRoll extends SurfaceView implements SurfaceHolder.Callback {
 			drawNote(note);
 		}
 
-		bufferCanvas.translate(-(BlackBorder), -(BlackBorder));
+		bufferCanvas.translate(-(BlackBorder), 0);
 
 		canvas.drawBitmap(bufferBitmap, 0, 0, paint);
 	}
 
 	private void drawNote(Note note) {
-		Log.d("roll", note.tone + " " + note.start);
-
 		// Load the image as a NinePatch drawable
 		NinePatchDrawable npd = (NinePatchDrawable) getContext().getResources().getDrawable(R.drawable.note_bar_green);
 
 		// Set its bound where you need
-		//Rect npdBounds = new Rect(4 * WhiteKeyWidth, 200, 5 * WhiteKeyWidth, 250);
-		npd.setBounds((note.tone - KEY_NOTE_OFFSET) * WhiteKeyWidth, note.start / 10, (note.tone + 1 - KEY_NOTE_OFFSET) * WhiteKeyWidth, (note.start + note.duration) / 10);
+		int y0 = rollHeight + (int) ((PianoActivity.piano.currentPulseTime - note.start - note.duration) / pulsesPerPixel);
+		int y1 = rollHeight + (int) ((PianoActivity.piano.currentPulseTime - note.start) / pulsesPerPixel);
+		if (inRange(y0, 0, rollHeight) || inRange(y1, 0, rollHeight)) {
+			npd.setBounds((note.tone - KEY_NOTE_OFFSET) * WhiteKeyWidth, y0, (note.tone + 1 - KEY_NOTE_OFFSET) * WhiteKeyWidth, y1);
+		}
 
 		// Finally draw on the canvas
 		npd.draw(bufferCanvas);
+	}
+
+	private boolean inRange(int a, int min, int max) {
+		return a >= min && a <= max;
 	}
 
 	/** TODO ?? */

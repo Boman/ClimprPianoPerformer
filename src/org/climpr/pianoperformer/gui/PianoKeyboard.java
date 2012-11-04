@@ -14,7 +14,6 @@ package org.climpr.pianoperformer.gui;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -23,7 +22,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -313,7 +311,6 @@ public class PianoKeyboard extends SurfaceView implements SurfaceHolder.Callback
 	 */
 	public synchronized void shadeKey(int notenumber, int shade) {
 		shadedKeys[notenumber - KEY_NOTE_OFFSET] = shade;
-		Log.d("Piano", "shade ," + notenumber + ", " + shade);
 		draw();
 	}
 

@@ -40,8 +40,8 @@ public class PianoActivity extends Activity {
 	public static final String MidiTitleID = "MidiTitleID";
 
 	public static Piano piano;
-	private PianoKeyboard pianoKeyboard;
-	private NoteRoll noteRoll;
+	public static PianoKeyboard pianoKeyboard;
+	public static NoteRoll noteRoll;
 
 	private LinearLayout layout;
 
