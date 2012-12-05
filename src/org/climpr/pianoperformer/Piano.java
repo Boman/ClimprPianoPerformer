@@ -19,6 +19,7 @@ public class Piano extends MidiFile {
 
 	double speed;
 	public double currentPulseTime;
+	public double lastPulse;
 
 	private double pulsesPerMsec;
 
@@ -27,6 +28,7 @@ public class Piano extends MidiFile {
 
 		speed = 1;
 		currentPulseTime = 0;
+		lastPulse = 0;
 
 		pulsesPerMsec = getTime().getQuarter() / 1000.0;
 		Log.d("piano", "pulsesPerMsec " + pulsesPerMsec);
@@ -35,36 +37,14 @@ public class Piano extends MidiFile {
 		for (MidiTrack track : tracks) {
 			for (MidiNote note : track.getNotes()) {
 				notes.add(new Note(note.getNumber(), note.getChannel(), 128, note.getStartTime(), note.getDuration()));
+				lastPulse = Math.max(lastPulse, note.getStartTime() + note.getDuration());
 			}
 		}
-
-		timer = new Handler();
-		timer.postDelayed(TimerCallback, 1000);
 	}
 
 	public List<Note> getNotes() {
 		return notes;
 	}
-
-	Runnable TimerCallback = new Runnable() {
-		private long prevTime = 0;
-
-		public void run() {
-			long msecNow = SystemClock.uptimeMillis();
-			long msecDelta = msecNow - prevTime;
-			if (prevTime == 0) {
-				msecDelta = 0;
-			}
-			prevTime = msecNow;
-			currentPulseTime += msecDelta * pulsesPerMsec;
-			//Log.d("piano", "currentPulseTime " + currentPulseTime);
-
-			PianoActivity.noteRoll.update();
-
-			timer.postDelayed(TimerCallback, 50);
-			return;
-		}
-	};
 
 	public void screenKeyPressed(int note) {
 

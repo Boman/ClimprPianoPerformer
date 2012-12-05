@@ -43,32 +43,17 @@ public class PianoActivity extends Activity {
 	public static PianoKeyboard pianoKeyboard;
 	public static NoteRoll noteRoll;
 
-	private LinearLayout layout;
-
 	@Override
 	public void onCreate(Bundle state) {
 		super.onCreate(state);
+		setContentView(R.layout.piano);
 
 		byte[] data = this.getIntent().getByteArrayExtra(MidiDataID);
 		String title = this.getIntent().getStringExtra(MidiTitleID);
 		piano = new Piano(data, title);
 
-		createView();
-	}
-
-	/* Create the MidiPlayer and Piano views */
-	void createView() {
-		layout = new LinearLayout(this);
-		layout.setOrientation(LinearLayout.VERTICAL);
-		setContentView(layout);
-
-		noteRoll = new NoteRoll(this);
-		layout.addView(noteRoll);
-		layout.requestLayout();
-
-		pianoKeyboard = new PianoKeyboard(this);
-		layout.addView(pianoKeyboard);
-		layout.requestLayout();
+		noteRoll = (NoteRoll) findViewById(R.id.note_roll_container);
+		pianoKeyboard = (PianoKeyboard) findViewById(R.id.piano_keyboard_container);
 	}
 
 	/** Always display this activity in landscape mode. */
@@ -115,24 +100,6 @@ public class PianoActivity extends Activity {
 	}
 
 	/**
-	 * To change the sheet music options, start the SettingsActivity. Pass the
-	 * current Midiptions as a parameter to the Intent. When the
-	 * SettingsActivity has finished, the onActivityResult() method will be
-	 * called.
-	 */
-	private void changeSettings() {
-		// Intent intent = new Intent(this, SettingsActivity.class);
-		// intent.putExtra(SettingsActivity.settingsID, options);
-		// startActivityForResult(intent, settingsRequestCode);
-	}
-
-	/** Show the HTML help screen. */
-	private void showHelp() {
-		// Intent intent = new Intent(this, HelpActivity.class);
-		// startActivity(intent);
-	}
-
-	/**
 	 * This is the callback when the SettingsActivity is finished. Get the
 	 * modified MidiOptions (passed as a parameter in the Intent). Re-create the
 	 * SheetMusic View with the new options.
@@ -165,32 +132,9 @@ public class PianoActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		layout.requestLayout();
-		pianoKeyboard.invalidate();
-		layout.requestLayout();
-
-		if (t == null) {
-			t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					int i = 40;
-					while (true) {
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						pianoKeyboard.shadeKey(i, 0);
-						if (i++ > 60) {
-							i = 40;
-						}
-						pianoKeyboard.shadeKey(i, 1);
-					}
-				}
-			});
-			// t.run();
-		}
+		//		layout.requestLayout();
+		//		pianoKeyboard.invalidate();
+		//		layout.requestLayout();
 
 		Intent intent = getIntent();
 		String action = intent.getAction();
