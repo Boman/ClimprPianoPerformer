@@ -3,6 +3,7 @@
 	<name>ClimprPianoPerformer</name>
 	<comment></comment>
 	<projects>
+		<project>MIDIDriver</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
