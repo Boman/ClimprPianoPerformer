@@ -85,6 +85,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.climprpiano.R;
+import org.climprpiano.R.raw;
 
 import android.content.Context;
 import android.util.Log;
@@ -94,7 +95,7 @@ public class PianoInstrument extends Instrument {
 		super(context);
 
 		Pattern pat = Pattern.compile("^pno0*([0-9]+)v");
-		Class raw = R.raw.class;
+		Class<raw> raw = R.raw.class;
 		Field[] fields = raw.getFields();
 		List<int[]> sounds = new ArrayList<int[]>(); // Are there really no
 														// tuples in Java?!

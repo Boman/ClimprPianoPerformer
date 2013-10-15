@@ -1,0 +1,23 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fullscreen_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    tools:context=".PianoActivity" >
+
+    <org.climprpiano.PianoRollView
+        android:id="@+id/piano_roll_container"
+        android:layout_width="fill_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1" />
+
+    <org.climprpiano.PianoKeyboardView
+        android:id="@+id/piano_keyboard_container"
+        android:layout_width="fill_parent"
+        android:layout_height="150dp"
+        android:layout_gravity="bottom|center_horizontal" />
+
+</LinearLayout>

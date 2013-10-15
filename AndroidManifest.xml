@@ -1,66 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.climprpiano"
-    android:versionCode="9"
-    android:versionName="2.6" >
+    android:versionCode="1"
+    android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="12"
+        android:minSdkVersion="11"
         android:targetSdkVersion="18" />
-
-    <uses-feature android:name="android.hardware.usb.host" />
-
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/icon"
+        android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
         <activity
-            android:name="com.midisheetmusic.MidiSheetMusicActivity"
-            android:configChanges="orientation"
-            android:label="@string/app_name"
-            android:screenOrientation="landscape" >
+            android:name="org.climprpiano.PianoActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                android:resource="@xml/device_filter" />
         </activity>
-        <activity android:name="com.midisheetmusic.ChooseSongActivity" >
+        <activity android:name="org.climprpiano.midisheetmusic.ChooseSongActivity" >
         </activity>
-        <activity android:name="com.midisheetmusic.FileBrowserActivity" >
+        <activity android:name="org.climprpiano.midisheetmusic.FileBrowserActivity" >
         </activity>
-        <activity android:name="com.midisheetmusic.AllSongsActivity" >
+        <activity android:name="org.climprpiano.midisheetmusic.AllSongsActivity" >
         </activity>
-        <activity android:name="com.midisheetmusic.RecentSongsActivity" >
-        </activity>
-        <activity android:name="com.midisheetmusic.SettingsActivity" >
-        </activity>
-        <activity android:name="com.midisheetmusic.HelpActivity" >
+        <activity android:name="org.climprpiano.midisheetmusic.RecentSongsActivity" >
         </activity>
         <activity
-            android:name="com.midisheetmusic.SheetMusicActivity"
-            android:configChanges="orientation"
-            android:screenOrientation="landscape" >
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data
-                    android:host="*"
-                    android:mimeType="*/*"
-                    android:pathPattern=".*\\.mid"
-                    android:scheme="file" />
-            </intent-filter>
+            android:name="org.climprpiano.HelpActivity"
+            android:label="@string/title_activity_help" >
         </activity>
     </application>
 

@@ -28,11 +28,12 @@ package org.hexiano;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.SoundPool;
-import android.util.Log;
 
+@SuppressLint("UseSparseArrays")
 public abstract class Instrument {
 
 	public static final int POLYPHONY_COUNT = 8;
@@ -62,12 +63,10 @@ public abstract class Instrument {
 	}
 
 	public int play(int midiNoteNumber, int velocity) {
-		Log.d("Instrument", "play(" + midiNoteNumber + ")");
 		int index = mRootNotes.get(midiNoteNumber);
 		if (!mSounds.containsKey(index)) {
 			return -1;
 		}
-		Log.d("Instrument", "rootNote is " + index + ")");
 		float rate = mRates.get(midiNoteNumber);
 
 		float streamVolume = 1.0f
