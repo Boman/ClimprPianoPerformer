@@ -165,12 +165,12 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 		// draw horizontal red lines at the position of each loop mark
 		paint.setStyle(Paint.Style.STROKE);
 		for (double loopMark : pianoManager.getLoopMarks()) {
-			loopMark = (loopMark - pianoManager.getCurrentPulseTime()) * pixelsPerPulse;
+			loopMark = height - (loopMark - pianoManager.getCurrentPulseTime()) * pixelsPerPulse;
 			if (loopMark > 0 && loopMark < height) {
 				paint.setColor(Color.rgb(150, 0, 0));
-				canvas.drawLine(0, height - (int) loopMark, width, height - (int) loopMark, paint);
+				canvas.drawLine(0, (int) loopMark, width, (int) loopMark, paint);
 				paint.setColor(Color.rgb(170, 20, 20));
-				canvas.drawLine(0, height - (int) loopMark + 1, width, height - (int) loopMark + 1, paint);
+				canvas.drawLine(0, (int) loopMark + 1, width, (int) loopMark + 1, paint);
 			}
 		}
 
@@ -216,7 +216,7 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 			touchTimer.postDelayed(new Runnable() {
 				@Override
 				public void run() {
-					// check for long press (add/remove loop mark)
+					// check for long press and add or remove loop mark
 					if (!inMotion)
 						return;
 					if (Math.abs(firstMotionY - startMotionY) <= 10) {
@@ -224,7 +224,8 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 						Collections.sort(loopMarks);
 						for (Double loopMark : loopMarks) {
 							if (Math.abs(height - startMotionY + (pianoManager.getCurrentPulseTime() - loopMark)
-							        * pixelsPerPulse) < height / 10) {
+							        * pixelsPerPulse) < pianoManager.getMidifile().getTime().getMeasure()
+							        * pixelsPerPulse / 6) {
 								pianoManager.removeLoopMark(loopMark);
 								return;
 							}
@@ -233,7 +234,8 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 						        % (pianoManager.getMidifile().getTime().getMeasure() * pixelsPerPulse); i < height; i += pianoManager
 						        .getMidifile().getTime().getMeasure()
 						        * pixelsPerPulse) {
-							if (Math.abs(startMotionY - i) < height / 10) {
+							if (Math.abs(startMotionY - i) < pianoManager.getMidifile().getTime().getMeasure()
+							        * pixelsPerPulse / 6) {
 								pianoManager.addLoopMark((height - i) / pixelsPerPulse
 								        + pianoManager.getCurrentPulseTime());
 								return;
