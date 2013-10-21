@@ -1,5 +1,6 @@
 package org.climprpiano;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +54,8 @@ public class PianoManager {
 	private double currentPulseTime;
 	private double playSpeed;
 
+	private ArrayList<MidiNote> lastChord;
+
 	Handler timer;
 	/** Timer used to update the sheet music while playing */
 	long startTime;
@@ -75,6 +78,8 @@ public class PianoManager {
 		this.pianoActivity = pianoActivity;
 
 		initOptions();
+
+		lastChord = new ArrayList<MidiNote>();
 
 		timer = new Handler();
 
@@ -102,9 +107,10 @@ public class PianoManager {
 			setCurrentPulseTime(0);
 			return;
 		}
-		Collections.sort(loopMarks);
 		// start the search 100 msec before the current pulse
+		Collections.sort(loopMarks);
 		int position = Collections.binarySearch(loopMarks, getCurrentPulseTime() - 100 * pulsesPerMsec);
+		// if position is negative the position contains the -index-1 where the element would be found
 		if (position < 0) {
 			position = -position - 2;
 			if (position < 0) {
@@ -116,7 +122,7 @@ public class PianoManager {
 	}
 
 	/**
-	 * sets currentPulseTime to the next loop mark or the beginning of the song
+	 * sets currentPulseTime to the next loop mark or the ending of the song
 	 */
 	public void loopForward() {
 		if (loopMarks.size() == 0) {
@@ -179,22 +185,42 @@ public class PianoManager {
 					return;
 				}
 
-				// calculate the colors for the keyboard keys
-				Map<Integer, Integer> keyColors = new HashMap<Integer, Integer>();
-				// and the notes to play via audio
-				Map<Integer, Integer> notes = new HashMap<Integer, Integer>();
+				// search for the notes which are currently played
+				ArrayList<MidiNote> newChord = new ArrayList<MidiNote>();
 				for (MidiTrack track : midifile.getTracks()) {
 					for (MidiNote note : track.getNotes()) {
 						if (note.getStartTime() < currentPulseTime
 						        && note.getStartTime() + note.getDuration() > currentPulseTime) {
-							keyColors.put(note.getNumber(), Color.RED);
-							notes.put(note.getNumber(), 127);
+							newChord.add(note);
 						}
 					}
 				}
+
+				// check the corresponding played notes by the player
+				// TODO
+
+				// stop the audio for notes which are not longer played
+				for (MidiNote note : lastChord) {
+					if (!newChord.contains(note)) {
+						soundController.stop(note.getNumber());
+					}
+				}
+				// start the audio for new notes
+				for (MidiNote note : newChord) {
+					if (!lastChord.contains(note)) {
+						soundController.play(note.getNumber(), 127);
+					}
+				}
+
+				lastChord = newChord;
+
+				// update the keyboard with the played notes
+				Map<Integer, Integer> keyColors = new HashMap<Integer, Integer>();
+				for (MidiNote note : newChord) {
+					keyColors.put(note.getNumber(), Color.RED);
+				}
 				pianoKeyboardView.shadeKeys(keyColors);
 				pianoRollView.update();
-				soundController.setNotes(notes);
 
 				timer.postDelayed(TimerCallback, 20);
 				return;

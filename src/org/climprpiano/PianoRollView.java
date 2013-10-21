@@ -3,7 +3,6 @@ package org.climprpiano;
 import java.util.Collections;
 import java.util.List;
 
-import org.climprpiano.PianoManager.PlayState;
 import org.climprpiano.midisheetmusic.MidiNote;
 import org.climprpiano.midisheetmusic.MidiTrack;
 
@@ -44,8 +43,11 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 	/** The y pixel when a touch motion starts */
 	private float deltaY;
 	/** The change in y-pixel of the last motion */
-	private boolean inMotion;
-	/** True if we're in a motion event */
+
+	private int numTouches = 0; // number of finger touches on the screen
+	private float startMotionCenter;
+	private float startMotionScale;
+
 	private long lastMotionTime;
 	/** Time of the last motion event (millsec) */
 	private Handler scrollTimer;
@@ -197,6 +199,35 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 		}
 	}
 
+	// check for long press and add or remove loop mark
+	Runnable TouchTimer = new Runnable() {
+		@Override
+		public void run() {
+			if (numTouches == 1 && Math.abs(firstMotionY - startMotionY) <= 10) {
+				List<Double> loopMarks = pianoManager.getLoopMarks();
+				Collections.sort(loopMarks);
+				for (Double loopMark : loopMarks) {
+					if (Math.abs(height - startMotionY + (pianoManager.getCurrentPulseTime() - loopMark)
+					        * pixelsPerPulse) < pianoManager.getMidifile().getTime().getMeasure() * pixelsPerPulse / 6) {
+						pianoManager.removeLoopMark(loopMark);
+						return;
+					}
+				}
+				for (double i = (height + pianoManager.getCurrentPulseTime() * pixelsPerPulse)
+				        % (pianoManager.getMidifile().getTime().getMeasure() * pixelsPerPulse); i < height; i += pianoManager
+				        .getMidifile().getTime().getMeasure()
+				        * pixelsPerPulse) {
+					if (Math.abs(startMotionY - i) < pianoManager.getMidifile().getTime().getMeasure() * pixelsPerPulse
+					        / 6) {
+						pianoManager.addLoopMark((height - i) / pixelsPerPulse + pianoManager.getCurrentPulseTime());
+						return;
+					}
+				}
+				pianoManager.addLoopMark((height - startMotionY) / pixelsPerPulse + pianoManager.getCurrentPulseTime());
+			}
+		}
+	};
+
 	/**
 	 * Handle touch/motion events to implement scrolling the sheet music. - On down touch, store the (x,y) of the touch - On a motion event, calculate the delta
 	 * (change) in x, y. Update the scrolX, scrollY and redraw the sheet music. - On a up touch, implement a 'fling'. Call flingScroll every 50 msec for the
@@ -207,59 +238,42 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 		int action = event.getAction() & MotionEvent.ACTION_MASK;
 		switch (action) {
 		case MotionEvent.ACTION_DOWN:
-			pianoManager.setPlayState(PlayState.PAUSE);
+			numTouches = 1;
 			deltaY = 0;
 			scrollTimer.removeCallbacks(flingScroll);
-			inMotion = true;
 			startMotionY = (int) event.getY();
 			firstMotionY = startMotionY;
-			touchTimer.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					// check for long press and add or remove loop mark
-					if (!inMotion)
-						return;
-					if (Math.abs(firstMotionY - startMotionY) <= 10) {
-						List<Double> loopMarks = pianoManager.getLoopMarks();
-						Collections.sort(loopMarks);
-						for (Double loopMark : loopMarks) {
-							if (Math.abs(height - startMotionY + (pianoManager.getCurrentPulseTime() - loopMark)
-							        * pixelsPerPulse) < pianoManager.getMidifile().getTime().getMeasure()
-							        * pixelsPerPulse / 6) {
-								pianoManager.removeLoopMark(loopMark);
-								return;
-							}
-						}
-						for (double i = (height + pianoManager.getCurrentPulseTime() * pixelsPerPulse)
-						        % (pianoManager.getMidifile().getTime().getMeasure() * pixelsPerPulse); i < height; i += pianoManager
-						        .getMidifile().getTime().getMeasure()
-						        * pixelsPerPulse) {
-							if (Math.abs(startMotionY - i) < pianoManager.getMidifile().getTime().getMeasure()
-							        * pixelsPerPulse / 6) {
-								pianoManager.addLoopMark((height - i) / pixelsPerPulse
-								        + pianoManager.getCurrentPulseTime());
-								return;
-							}
-						}
-						pianoManager.addLoopMark((height - startMotionY) / pixelsPerPulse
-						        + pianoManager.getCurrentPulseTime());
-					}
-				}
-			}, 1000);
+			touchTimer.postDelayed(TouchTimer, 1000);
+			return true;
+		case MotionEvent.ACTION_POINTER_DOWN:
+			numTouches = 2;
+			touchTimer.removeCallbacks(TouchTimer);
+			startMotionCenter = (event.getY() + event.getY(1)) / 2;
+			startMotionScale = spacing(event);
 			return true;
 		case MotionEvent.ACTION_MOVE:
-			if (!inMotion)
-				return false;
-
-			deltaY = startMotionY - event.getY();
-			startMotionY = (int) event.getY();
-			pianoManager.setCurrentPulseTime(pianoManager.getCurrentPulseTime() - deltaY / pixelsPerPulse);
-
-			lastMotionTime = AnimationUtils.currentAnimationTimeMillis();
+			if (numTouches == 1) {
+				lastMotionTime = AnimationUtils.currentAnimationTimeMillis();
+				deltaY = startMotionY - event.getY();
+				startMotionY = (int) event.getY();
+				pianoManager.setCurrentPulseTime(pianoManager.getCurrentPulseTime() - deltaY / pixelsPerPulse);
+			} else if (numTouches == 2) {
+				double middlePulseTime = pianoManager.getCurrentPulseTime() + (height - startMotionCenter)
+				        / pixelsPerPulse;
+				pixelsPerPulse *= spacing(event) / startMotionScale;
+				pianoManager.setCurrentPulseTime((middlePulseTime * pixelsPerPulse - (height - startMotionCenter))
+				        / pixelsPerPulse);
+				startMotionCenter = (event.getY() + event.getY(1)) / 2;
+				startMotionScale = spacing(event);
+			}
 			return true;
-
+		case MotionEvent.ACTION_POINTER_UP:
+			numTouches = 1;
+			startMotionY = (int) event.getY();
+			deltaY = 0;
+			return true;
 		case MotionEvent.ACTION_UP:
-			inMotion = false;
+			numTouches = 0;
 			long deltaTime = AnimationUtils.currentAnimationTimeMillis() - lastMotionTime;
 
 			if (deltaTime >= 100) {
@@ -283,6 +297,13 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 		default:
 			return false;
 		}
+	}
+
+	/** Determine the space between the first two fingers */
+	private float spacing(MotionEvent event) {
+		float x = event.getX(0) - event.getX(1);
+		float y = event.getY(0) - event.getY(1);
+		return (float) Math.sqrt(x * x + y * y);
 	}
 
 	/**
