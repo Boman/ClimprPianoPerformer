@@ -50,7 +50,7 @@ import android.widget.ToggleButton;
  */
 public class PianoActivity extends AbstractMultipleMidiActivity {
 
-	public static final String MidiTitleID = "MidiTitleID";
+	public static final String MIDI_TITLE_ID = "MidiTitleID";
 
 	int arr_images[] = { R.drawable.listen, R.drawable.play_pause, R.drawable.media_drum_kit, R.drawable.play }; // images for the playTypeSpinner
 
@@ -68,6 +68,7 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 	private ToggleButton rigthHandCheckbox;
 
 	public static final double SPEED_MULTIPLIER = 2;
+	public static final int SEEK_BAR_DIVIDER = 20;
 	private SeekBar speedBar;
 	private TextView speedText;
 
@@ -119,13 +120,13 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 
 		// functionality of the speedBar
 		speedBar = (SeekBar) findViewById(R.id.seekBarSpeed);
-		speedBar.setMax(100);
+		speedBar.setMax(SEEK_BAR_DIVIDER);
 		speedText = (TextView) findViewById(R.id.textViewSpeed);
 		speedBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				double speed = 1.0 / SPEED_MULTIPLIER
-				        * Math.pow(SPEED_MULTIPLIER * SPEED_MULTIPLIER, seekBar.getProgress() / 100.0);
+				        * Math.pow(SPEED_MULTIPLIER * SPEED_MULTIPLIER, seekBar.getProgress() * 1.0 / SEEK_BAR_DIVIDER);
 				pianoManager.setPlaySpeed(speed);
 			}
 
@@ -135,7 +136,7 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-				double speed = 1.0 / SPEED_MULTIPLIER * Math.pow(SPEED_MULTIPLIER * SPEED_MULTIPLIER, progress / 100.0);
+				double speed = 1.0 / SPEED_MULTIPLIER * Math.pow(SPEED_MULTIPLIER * SPEED_MULTIPLIER, progress * 1.0 / SEEK_BAR_DIVIDER);
 				speedText.setText(PianoActivity.this.getResources().getString(R.string.speed) + ": "
 				        + (int) (speed * 100) + "%");
 			}
@@ -212,7 +213,7 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 
 		// Parse the MidiFile from the raw bytes or load the last file
 		Uri uri = this.getIntent().getData();
-		String title = this.getIntent().getStringExtra(MidiTitleID);
+		String title = this.getIntent().getStringExtra(MIDI_TITLE_ID);
 		FileUri file = null;
 		if (uri == null) {
 			List<FileUri> lastSongs = getLastSongs();
@@ -357,7 +358,7 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 	 *            the playSpeed to set
 	 */
 	public void setPlaySpeed(double playSpeed) {
-		speedBar.setProgress((int) (Math.log(playSpeed * SPEED_MULTIPLIER) / 2 / Math.log(SPEED_MULTIPLIER) * 100));
+		speedBar.setProgress((int) (Math.log(playSpeed * SPEED_MULTIPLIER) / 2 / Math.log(SPEED_MULTIPLIER) * SEEK_BAR_DIVIDER));
 	}
 
 	/**

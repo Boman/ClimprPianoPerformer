@@ -176,8 +176,9 @@ public class PianoManager {
 				Log.d("play", "pause");
 				return;
 			} else if (playState == PlayState.PLAY) {
-				long msec = SystemClock.uptimeMillis() - startTime;
-				currentPulseTime = startPulseTime + msec * pulsesPerMsec;
+				long currentTime = SystemClock.uptimeMillis();
+				currentPulseTime += (currentTime - startTime) * pulsesPerMsec;
+				startTime = currentTime;
 
 				/* Stop if we've reached the end of the song */
 				if (currentPulseTime > midifile.getTotalPulses()) {

@@ -74,7 +74,7 @@ public class ChooseSongActivity extends TabActivity {
             return;
         }
         Intent intent = new Intent(Intent.ACTION_VIEW, file.getUri(), this, PianoActivity.class);
-        intent.putExtra(PianoActivity.MidiTitleID, file.toString());
+        intent.putExtra(PianoActivity.MIDI_TITLE_ID, file.toString());
         startActivity(intent);
     }
 

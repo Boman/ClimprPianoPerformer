@@ -13,6 +13,7 @@ import android.graphics.Paint;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -243,7 +244,7 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 			scrollTimer.removeCallbacks(flingScroll);
 			startMotionY = (int) event.getY();
 			firstMotionY = startMotionY;
-			touchTimer.postDelayed(TouchTimer, 1000);
+			touchTimer.postDelayed(TouchTimer, 1500);
 			return true;
 		case MotionEvent.ACTION_POINTER_DOWN:
 			numTouches = 2;
@@ -261,14 +262,16 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 				double middlePulseTime = pianoManager.getCurrentPulseTime() + (height - startMotionCenter)
 				        / pixelsPerPulse;
 				pixelsPerPulse *= spacing(event) / startMotionScale;
-				pianoManager.setCurrentPulseTime((middlePulseTime * pixelsPerPulse - (height - startMotionCenter))
+				float newMotionCenter = (event.getY() + event.getY(1)) / 2;
+				pianoManager.setCurrentPulseTime((middlePulseTime * pixelsPerPulse - (height - newMotionCenter))
 				        / pixelsPerPulse);
-				startMotionCenter = (event.getY() + event.getY(1)) / 2;
+				startMotionCenter = newMotionCenter;
 				startMotionScale = spacing(event);
 			}
 			return true;
 		case MotionEvent.ACTION_POINTER_UP:
 			numTouches = 1;
+			touchTimer.removeCallbacks(TouchTimer);
 			startMotionY = (int) event.getY();
 			deltaY = 0;
 			return true;
@@ -279,6 +282,8 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 			if (deltaTime >= 100) {
 				return true;
 			}
+
+			Log.d("roll", deltaTime + ", " + deltaY);
 
 			/*
 			 * Keep scrolling for 2 more seconds. Scale the delta to 20 msec. Make sure delta doesn't exceed the maximum scroll delta.
