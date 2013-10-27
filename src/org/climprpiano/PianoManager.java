@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+
 import org.climprpiano.midisheetmusic.FileUri;
 import org.climprpiano.midisheetmusic.MidiFile;
 import org.climprpiano.midisheetmusic.MidiFileException;
@@ -14,12 +15,14 @@ import org.climprpiano.midisheetmusic.MidiTrack;
 import org.hexiano.SoundController;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -41,6 +44,8 @@ public class PianoManager {
 	enum RepeatMode {
 		NONE, ALL, SINGLE
 	}
+
+	private static final int MAX_NOTE_DEVIATION = 500;
 
 	private PianoRollView pianoRollView;
 	private PianoKeyboardView pianoKeyboardView;
@@ -67,10 +72,13 @@ public class PianoManager {
 
 	private List<Double> loopMarks;
 
+	private PianoPlaying pianoPlaying;
+
 	private FileUri fileUri;
 	private MidiFile midifile;
 
-	private SoundController soundController; // the hexiano component for playing notes
+	private SoundController soundController; // the hexiano component for
+												// playing notes
 
 	public PianoManager(PianoRollView pianoRollView, PianoKeyboardView pianoKeyboardView, PianoActivity pianoActivity) {
 		this.pianoRollView = pianoRollView;
@@ -87,16 +95,40 @@ public class PianoManager {
 	}
 
 	private void initOptions() {
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(pianoActivity);
+		boolean showFullKeyboard = sharedPref.getBoolean("pref_full_keyboard", false);
+		setShowedKeys(showFullKeyboard);
+
 		setPlayMode(PlayMode.FOLLOW_YOU);
-		setHandMode(HandMode.RIGHT);
+		setHandMode(HandMode.BOTH);
 		setRepeatMode(RepeatMode.NONE);
 		setPlayState(PlayState.STOP);
 		setCurrentPulseTime(0);
 		setPlaySpeed(1);
 		loopMarks = new Vector<Double>();
+		pianoPlaying = new PianoPlaying();
 
 		pianoRollView.update();
 		pianoKeyboardView.shadeKeys(new HashMap<Integer, Integer>());
+	}
+
+	private void setShowedKeys(boolean showFullKeyboard) {
+		int min = 21;
+		int max = 108;
+		if (!showFullKeyboard && midifile != null) {
+			for (MidiTrack track : midifile.getTracks()) {
+				for (MidiNote note : track.getNotes()) {
+					if (min == 21 || min > note.getNumber()) {
+						min = note.getNumber();
+					}
+					if (max == 108 || max < note.getNumber()) {
+						max = note.getNumber();
+					}
+				}
+			}
+		}
+		pianoRollView.setDisplayedKeys(min, max);
+		pianoKeyboardView.setDisplayedKeys(min, max);
 	}
 
 	/**
@@ -110,7 +142,8 @@ public class PianoManager {
 		// start the search 100 msec before the current pulse
 		Collections.sort(loopMarks);
 		int position = Collections.binarySearch(loopMarks, getCurrentPulseTime() - 100 * pulsesPerMsec);
-		// if position is negative the position contains the -index-1 where the element would be found
+		// if position is negative the position contains the -index-1 where the
+		// element would be found
 		if (position < 0) {
 			position = -position - 2;
 			if (position < 0) {
@@ -148,7 +181,10 @@ public class PianoManager {
 
 	Map<Integer, Integer> keyColors;
 
+	// called whenever the player pressed or released a key on the MIDI device
 	public void pianoKeyPress(int midiNote, int velocity) {
+		pianoPlaying.newNote(midiNote, velocity, (int) (currentPulseTime + (SystemClock.uptimeMillis() - startTime)
+				* pulsesPerMsec));
 		// TODO
 		if (keyColors == null) {
 			keyColors = new HashMap<Integer, Integer>();
@@ -191,7 +227,7 @@ public class PianoManager {
 				for (MidiTrack track : midifile.getTracks()) {
 					for (MidiNote note : track.getNotes()) {
 						if (note.getStartTime() < currentPulseTime
-						        && note.getStartTime() + note.getDuration() > currentPulseTime) {
+								&& note.getStartTime() + note.getDuration() > currentPulseTime) {
 							newChord.add(note);
 						}
 					}
@@ -199,8 +235,22 @@ public class PianoManager {
 
 				// check the corresponding played notes by the player
 				// TODO
+				switch (playMode) {
+				case LISTEN:
+					break;
+				case PLAY_ALONG:
+					break;
+				case FOLLOW_YOU:
+					//if()
+					break;
+				case RYTHM_TAP:
 
-				// stop the audio for notes which are not longer played
+					break;
+				default:
+					break;
+				}
+
+				// stop the audio for notes which are no longer played
 				for (MidiNote note : lastChord) {
 					if (!newChord.contains(note)) {
 						soundController.stop(note.getNumber());

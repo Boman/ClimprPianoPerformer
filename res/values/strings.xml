@@ -8,6 +8,7 @@
     <string name="backward">backward</string>
     <string name="repeat">repeat</string>
     <string name="settings">settings</string>
+    <string name="song_settings">song settings</string>
     <string name="help">help</string>
     <string name="scan_files">scan files</string>
     <string name="browse_files">browse files</string>
@@ -16,5 +17,14 @@
     <string name="title_activity_help">Help</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="listen_only">listen only</string>
+    <string name="follow_your_playing">follow your playing</string>
+    <string name="rhythm_tapping">rhythm tapping</string>
+    <string name="play_strictly">play strictly</string>
+    <string name="text_about">About ClimprPiano</string>
+    <string name="html_third_party">Third-party</string>
+    <string name="html_translations">Translations</string>
+    <string name="full_keyboard">show full keyboard</string>
+    <string name="full_keyboard_summary">If not selected the keyboard shown is only as wide as needed for the song</string>
 
 </resources>

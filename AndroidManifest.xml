@@ -10,7 +10,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/icon"
         android:label="@string/app_name" >
         <activity
             android:name="org.climprpiano.PianoActivity"
@@ -21,6 +21,8 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name="org.climprpiano.SongSettingsActivity" >
         </activity>
         <activity android:name="org.climprpiano.midisheetmusic.ChooseSongActivity" >
         </activity>
@@ -33,6 +35,8 @@
         <activity
             android:name="org.climprpiano.HelpActivity"
             android:label="@string/title_activity_help" >
+        </activity>
+        <activity android:name="org.climprpiano.AboutActivity" >
         </activity>
     </application>
 

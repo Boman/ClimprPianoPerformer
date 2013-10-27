@@ -68,10 +68,10 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 		pixelsPerPulse = 0.15;
 
 		noteBars = new NinePatchDrawable[] {
-		        (NinePatchDrawable) getContext().getResources().getDrawable(R.drawable.note_bar_orange),
-		        (NinePatchDrawable) getContext().getResources().getDrawable(R.drawable.note_bar_blue),
-		        (NinePatchDrawable) getContext().getResources().getDrawable(R.drawable.note_bar_green),
-		        (NinePatchDrawable) getContext().getResources().getDrawable(R.drawable.note_bar_pink) };
+				(NinePatchDrawable) getContext().getResources().getDrawable(R.drawable.note_bar_orange),
+				(NinePatchDrawable) getContext().getResources().getDrawable(R.drawable.note_bar_blue),
+				(NinePatchDrawable) getContext().getResources().getDrawable(R.drawable.note_bar_green),
+				(NinePatchDrawable) getContext().getResources().getDrawable(R.drawable.note_bar_pink) };
 
 		scrollTimer = new Handler();
 		touchTimer = new Handler();
@@ -156,9 +156,9 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 		// draw horizontal grey lines at the position of each measure
 		paint.setStyle(Paint.Style.STROKE);
 		for (double i = (height + pianoManager.getCurrentPulseTime() * pixelsPerPulse)
-		        % (pianoManager.getMidifile().getTime().getMeasure() * pixelsPerPulse); i < height; i += pianoManager
-		        .getMidifile().getTime().getMeasure()
-		        * pixelsPerPulse) {
+				% (pianoManager.getMidifile().getTime().getMeasure() * pixelsPerPulse); i < height; i += pianoManager
+				.getMidifile().getTime().getMeasure()
+				* pixelsPerPulse) {
 			paint.setColor(Color.rgb(120, 120, 120));
 			canvas.drawLine(0, (int) i, width, (int) i, paint);
 			paint.setColor(Color.rgb(140, 140, 140));
@@ -188,13 +188,13 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 	private void drawNote(MidiNote note, int track, Canvas canvas) {
 		// calculate top and bottom position
 		int y0 = height
-		        - (int) ((note.getStartTime() + note.getDuration() - pianoManager.getCurrentPulseTime()) * pixelsPerPulse);
+				- (int) ((note.getStartTime() + note.getDuration() - pianoManager.getCurrentPulseTime()) * pixelsPerPulse);
 		int y1 = height - (int) ((note.getStartTime() - pianoManager.getCurrentPulseTime()) * pixelsPerPulse);
 		// check if the note bar is within the canvas
 		if (y0 <= height && y1 >= 0 && track < noteBars.length) {
 			// set bounds of note bar
 			noteBars[track].setBounds(keyPositions[note.getNumber() - keyOffset][1], y0, keyPositions[note.getNumber()
-			        - keyOffset][2], y1);
+					- keyOffset][2], y1);
 			// draw on the canvas
 			noteBars[track].draw(canvas);
 		}
@@ -209,17 +209,17 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 				Collections.sort(loopMarks);
 				for (Double loopMark : loopMarks) {
 					if (Math.abs(height - startMotionY + (pianoManager.getCurrentPulseTime() - loopMark)
-					        * pixelsPerPulse) < pianoManager.getMidifile().getTime().getMeasure() * pixelsPerPulse / 6) {
+							* pixelsPerPulse) < pianoManager.getMidifile().getTime().getMeasure() * pixelsPerPulse / 6) {
 						pianoManager.removeLoopMark(loopMark);
 						return;
 					}
 				}
 				for (double i = (height + pianoManager.getCurrentPulseTime() * pixelsPerPulse)
-				        % (pianoManager.getMidifile().getTime().getMeasure() * pixelsPerPulse); i < height; i += pianoManager
-				        .getMidifile().getTime().getMeasure()
-				        * pixelsPerPulse) {
+						% (pianoManager.getMidifile().getTime().getMeasure() * pixelsPerPulse); i < height; i += pianoManager
+						.getMidifile().getTime().getMeasure()
+						* pixelsPerPulse) {
 					if (Math.abs(startMotionY - i) < pianoManager.getMidifile().getTime().getMeasure() * pixelsPerPulse
-					        / 6) {
+							/ 6) {
 						pianoManager.addLoopMark((height - i) / pixelsPerPulse + pianoManager.getCurrentPulseTime());
 						return;
 					}
@@ -260,23 +260,23 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 				pianoManager.setCurrentPulseTime(pianoManager.getCurrentPulseTime() - deltaY / pixelsPerPulse);
 			} else if (numTouches == 2) {
 				double middlePulseTime = pianoManager.getCurrentPulseTime() + (height - startMotionCenter)
-				        / pixelsPerPulse;
+						/ pixelsPerPulse;
 				pixelsPerPulse *= spacing(event) / startMotionScale;
 				float newMotionCenter = (event.getY() + event.getY(1)) / 2;
 				pianoManager.setCurrentPulseTime((middlePulseTime * pixelsPerPulse - (height - newMotionCenter))
-				        / pixelsPerPulse);
+						/ pixelsPerPulse);
 				startMotionCenter = newMotionCenter;
 				startMotionScale = spacing(event);
 			}
 			return true;
 		case MotionEvent.ACTION_POINTER_UP:
 			numTouches = 1;
-			touchTimer.removeCallbacks(TouchTimer);
-			startMotionY = (int) event.getY();
+			startMotionY = (event.getActionIndex() == 1) ? (int) event.getY() : (int) event.getY(1); // the new position of the remaining touch point
 			deltaY = 0;
 			return true;
 		case MotionEvent.ACTION_UP:
 			numTouches = 0;
+			touchTimer.removeCallbacks(TouchTimer);
 			long deltaTime = AnimationUtils.currentAnimationTimeMillis() - lastMotionTime;
 
 			if (deltaTime >= 100) {

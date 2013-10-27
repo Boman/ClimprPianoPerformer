@@ -62,7 +62,7 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 	private PianoRollView pianoRollView;
 	private PianoKeyboardView pianoKeyboardView;
 
-	private Spinner playTypeSpinner;
+	private Spinner playModeSpinner;
 
 	private ToggleButton leftHandCheckbox;
 	private ToggleButton rigthHandCheckbox;
@@ -95,9 +95,12 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 		actionBar.setDisplayShowCustomEnabled(true);
 
 		// create the playTypeSpinner
-		playTypeSpinner = (Spinner) findViewById(R.id.spinnerPlayType);
-		playTypeSpinner.setAdapter(new PlayTypeAdapter(PianoActivity.this, android.R.layout.simple_spinner_item,
-		        new String[] { "listen", "follow you", "rhythm", "play" }));
+		playModeSpinner = (Spinner) findViewById(R.id.spinnerPlayMode);
+		playModeSpinner.setAdapter(new PlayModeAdapter(PianoActivity.this, android.R.layout.simple_spinner_item,
+				new String[] { PianoActivity.this.getResources().getString(R.string.listen_only),
+						PianoActivity.this.getResources().getString(R.string.follow_your_playing),
+						PianoActivity.this.getResources().getString(R.string.rhythm_tapping),
+						PianoActivity.this.getResources().getString(R.string.play_strictly) }));
 
 		// functionality of the hand checkboxes
 		leftHandCheckbox = (ToggleButton) findViewById(R.id.checkBoxLeftHand);
@@ -126,7 +129,7 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				double speed = 1.0 / SPEED_MULTIPLIER
-				        * Math.pow(SPEED_MULTIPLIER * SPEED_MULTIPLIER, seekBar.getProgress() * 1.0 / SEEK_BAR_DIVIDER);
+						* Math.pow(SPEED_MULTIPLIER * SPEED_MULTIPLIER, seekBar.getProgress() * 1.0 / SEEK_BAR_DIVIDER);
 				pianoManager.setPlaySpeed(speed);
 			}
 
@@ -136,9 +139,10 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-				double speed = 1.0 / SPEED_MULTIPLIER * Math.pow(SPEED_MULTIPLIER * SPEED_MULTIPLIER, progress * 1.0 / SEEK_BAR_DIVIDER);
+				double speed = 1.0 / SPEED_MULTIPLIER
+						* Math.pow(SPEED_MULTIPLIER * SPEED_MULTIPLIER, progress * 1.0 / SEEK_BAR_DIVIDER);
 				speedText.setText(PianoActivity.this.getResources().getString(R.string.speed) + ": "
-				        + (int) (speed * 100) + "%");
+						+ (int) (speed * 100) + "%");
 			}
 		});
 
@@ -244,10 +248,17 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.song_settings:
+			Intent intent = new Intent(this, SongSettingsActivity.class);
+			startActivity(intent);
+			return true;
 		case R.id.settings:
 			return true;
 		case R.id.help:
 			showHelp();
+			return true;
+		case R.id.about:
+			showAbout();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -255,31 +266,37 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 	}
 
 	// Adapter for displaying the playType Spinner
-	public class PlayTypeAdapter extends ArrayAdapter<String> {
+	public class PlayModeAdapter extends ArrayAdapter<String> {
 		private LayoutInflater inflater;
 
-		public PlayTypeAdapter(Context context, int textViewResourceId, String[] objects) {
+		public PlayModeAdapter(Context context, int textViewResourceId, String[] objects) {
 			super(context, textViewResourceId, objects);
 			inflater = LayoutInflater.from(context);
 		}
 
 		@Override
 		public View getDropDownView(int position, View convertView, ViewGroup parent) {
-			return getCustomView(position, convertView, parent);
+			return getCustomView(position, convertView, parent, R.layout.image_row_dropwdown_layout, true);
 		}
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			return getCustomView(position, convertView, parent);
+			return getCustomView(position, convertView, parent, R.layout.image_row_layout, false);
 		}
 
-		public View getCustomView(int position, View convertView, ViewGroup parent) {
+		public View getCustomView(int position, View convertView, ViewGroup parent, int resourceId, boolean dropDown) {
 			if (convertView == null) {
-				convertView = inflater.inflate(R.layout.image_row_layout, null);
+				convertView = inflater.inflate(resourceId, null);
 			}
 
 			ImageView icon = (ImageView) convertView.findViewById(R.id.image);
 			icon.setImageResource(arr_images[position]);
+
+			if (dropDown) {
+				TextView text = (TextView) convertView.findViewById(R.id.text1);
+				String modeName = this.getItem(position);
+				text.setText(modeName);
+			}
 
 			return convertView;
 		}
@@ -328,16 +345,16 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 	public void setPlayMode(PlayMode playMode) {
 		switch (playMode) {
 		case LISTEN:
-			playTypeSpinner.setSelection(0);
+			playModeSpinner.setSelection(0);
 			break;
 		case FOLLOW_YOU:
-			playTypeSpinner.setSelection(1);
+			playModeSpinner.setSelection(1);
 			break;
 		case RYTHM_TAP:
-			playTypeSpinner.setSelection(2);
+			playModeSpinner.setSelection(2);
 			break;
 		case PLAY_ALONG:
-			playTypeSpinner.setSelection(3);
+			playModeSpinner.setSelection(3);
 			break;
 		default:
 			break;
@@ -358,7 +375,8 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 	 *            the playSpeed to set
 	 */
 	public void setPlaySpeed(double playSpeed) {
-		speedBar.setProgress((int) (Math.log(playSpeed * SPEED_MULTIPLIER) / 2 / Math.log(SPEED_MULTIPLIER) * SEEK_BAR_DIVIDER));
+		double barValue = Math.log(playSpeed * SPEED_MULTIPLIER) / 2 / Math.log(SPEED_MULTIPLIER) * SEEK_BAR_DIVIDER;
+		speedBar.setProgress(Math.max(0, Math.min(SEEK_BAR_DIVIDER, (int) barValue)));
 	}
 
 	/**
@@ -398,7 +416,7 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 		}
 		lastSongs.add(null);
 		ArrayAdapter<FileUri> songAdapter = new SongAdapter<FileUri>(this, android.R.layout.simple_spinner_item,
-		        lastSongs);
+				lastSongs);
 		songAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		songSpinner.setAdapter(songAdapter);
 	}
@@ -406,6 +424,12 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 	/** Show the HTML help screen. */
 	private void showHelp() {
 		Intent intent = new Intent(this, HelpActivity.class);
+		startActivity(intent);
+	}
+
+	/** Show the HTML about screen. */
+	private void showAbout() {
+		Intent intent = new Intent(this, AboutActivity.class);
 		startActivity(intent);
 	}
 
