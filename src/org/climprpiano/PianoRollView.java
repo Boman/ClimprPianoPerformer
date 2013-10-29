@@ -283,8 +283,6 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 				return true;
 			}
 
-			Log.d("roll", deltaTime + ", " + deltaY);
-
 			/*
 			 * Keep scrolling for 2 more seconds. Scale the delta to 20 msec. Make sure delta doesn't exceed the maximum scroll delta.
 			 */

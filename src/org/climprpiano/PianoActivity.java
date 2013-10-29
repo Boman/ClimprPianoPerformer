@@ -52,7 +52,7 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 
 	public static final String MIDI_TITLE_ID = "MidiTitleID";
 
-	int arr_images[] = { R.drawable.listen, R.drawable.play_pause, R.drawable.media_drum_kit, R.drawable.play }; // images for the playTypeSpinner
+	private int arr_images[] = { R.drawable.listen, R.drawable.play_pause, R.drawable.media_drum_kit, R.drawable.play }; // images for the playTypeSpinner
 
 	private static final int HIDER_FLAGS = SystemUiHider.FLAG_HIDE_NAVIGATION; // the flags to pass to {@link SystemUiHider#getInstance}
 	private SystemUiHider mSystemUiHider; // the instance of the {@link SystemUiHider} for this activity
@@ -67,8 +67,8 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 	private ToggleButton leftHandCheckbox;
 	private ToggleButton rigthHandCheckbox;
 
-	public static final double SPEED_MULTIPLIER = 2;
-	public static final int SEEK_BAR_DIVIDER = 20;
+	public static final double SPEED_MULTIPLIER = 2; // the range of maximum speed manipulation (2 => 50%-200%)
+	public static final int SEEK_BAR_DIVIDER = 20; // thenumber of steps of the speed bar
 	private SeekBar speedBar;
 	private TextView speedText;
 
@@ -249,16 +249,18 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.song_settings:
-			Intent intent = new Intent(this, SongSettingsActivity.class);
-			startActivity(intent);
+			Intent songSettingsIntent = new Intent(this, SongSettingsActivity.class);
+			startActivity(songSettingsIntent);
 			return true;
 		case R.id.settings:
 			return true;
 		case R.id.help:
-			showHelp();
+			Intent helpIntent = new Intent(this, HelpActivity.class);
+			startActivity(helpIntent);
 			return true;
 		case R.id.about:
-			showAbout();
+			Intent aboutIntent = new Intent(this, AboutActivity.class);
+			startActivity(aboutIntent);
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -419,18 +421,6 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 				lastSongs);
 		songAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		songSpinner.setAdapter(songAdapter);
-	}
-
-	/** Show the HTML help screen. */
-	private void showHelp() {
-		Intent intent = new Intent(this, HelpActivity.class);
-		startActivity(intent);
-	}
-
-	/** Show the HTML about screen. */
-	private void showAbout() {
-		Intent intent = new Intent(this, AboutActivity.class);
-		startActivity(intent);
 	}
 
 	@Override

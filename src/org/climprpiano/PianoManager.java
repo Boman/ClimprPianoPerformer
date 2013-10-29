@@ -45,40 +45,35 @@ public class PianoManager {
 		NONE, ALL, SINGLE
 	}
 
-	private static final int MAX_NOTE_DEVIATION = 500;
-
+	// the graphical components
 	private PianoRollView pianoRollView;
 	private PianoKeyboardView pianoKeyboardView;
 	private PianoActivity pianoActivity;
 
+	// different song settings
 	private PlayMode playMode;
 	private HandMode handMode;
 	private RepeatMode repeatMode;
 
+	// different song variables
 	private PlayState playState;
 	private double currentPulseTime;
 	private double playSpeed;
-
-	private ArrayList<MidiNote> lastChord;
-
-	Handler timer;
-	/** Timer used to update the sheet music while playing */
-	long startTime;
-	/** Absolute time when music started playing (msec) */
-	double startPulseTime;
-	/** Time (in pulses) when music started playing */
-	double pulsesPerMsec;
-	/** The number of pulses per millisec */
-
 	private List<Double> loopMarks;
 
+	// variables for handling the playing
 	private PianoPlaying pianoPlaying;
+	private ArrayList<MidiNote> lastChord;
+	Handler timer; //Timer used to update the sheet music while playing
+	long startTime; // Absolute time when music started playing (msec)
+	double startPulseTime; // Time (in pulses) when music started playing
+	double pulsesPerMsec; // The number of pulses per millisec
 
+	// the song uri and midifile
 	private FileUri fileUri;
 	private MidiFile midifile;
 
-	private SoundController soundController; // the hexiano component for
-												// playing notes
+	private SoundController soundController; // the hexiano component for playing the notes sound
 
 	public PianoManager(PianoRollView pianoRollView, PianoKeyboardView pianoKeyboardView, PianoActivity pianoActivity) {
 		this.pianoRollView = pianoRollView;
@@ -96,8 +91,8 @@ public class PianoManager {
 
 	private void initOptions() {
 		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(pianoActivity);
-		boolean showFullKeyboard = sharedPref.getBoolean("pref_full_keyboard", false);
-		setShowedKeys(showFullKeyboard);
+		boolean displayFullKeyboard = sharedPref.getBoolean("pref_full_keyboard", false);
+		setDisplayedKeys(displayFullKeyboard);
 
 		setPlayMode(PlayMode.FOLLOW_YOU);
 		setHandMode(HandMode.BOTH);
@@ -106,13 +101,12 @@ public class PianoManager {
 		setCurrentPulseTime(0);
 		setPlaySpeed(1);
 		loopMarks = new Vector<Double>();
-		pianoPlaying = new PianoPlaying();
 
 		pianoRollView.update();
 		pianoKeyboardView.shadeKeys(new HashMap<Integer, Integer>());
 	}
 
-	private void setShowedKeys(boolean showFullKeyboard) {
+	private void setDisplayedKeys(boolean showFullKeyboard) {
 		int min = 21;
 		int max = 108;
 		if (!showFullKeyboard && midifile != null) {
@@ -183,18 +177,53 @@ public class PianoManager {
 
 	// called whenever the player pressed or released a key on the MIDI device
 	public void pianoKeyPress(int midiNote, int velocity) {
-		pianoPlaying.newNote(midiNote, velocity, (int) (currentPulseTime + (SystemClock.uptimeMillis() - startTime)
-				* pulsesPerMsec));
+		if (pianoPlaying != null) {
+			// update the playing
+			pianoPlaying.newNote(midiNote, velocity, (int) (currentPulseTime + (SystemClock.uptimeMillis() - startTime)
+					* pulsesPerMsec));
+			updatePlaying(midiNote, velocity);
+		}
+
 		// TODO
 		if (keyColors == null) {
 			keyColors = new HashMap<Integer, Integer>();
 		}
 		if (velocity > 0 && !keyColors.containsKey(midiNote)) {
 			keyColors.put(midiNote, Color.GREEN);
-		} else if (velocity == -1 && keyColors.containsKey(midiNote)) {
+		} else if (velocity == 0 && keyColors.containsKey(midiNote)) {
 			keyColors.remove(midiNote);
 		}
 		pianoKeyboardView.shadeKeys(keyColors);
+	}
+
+	private void updatePlaying(int midiNote, int velocity) {
+		if (velocity > 0) {
+			// search for the notes which should get played next
+			for (MidiTrack track : midifile.getTracks()) {
+				int pulseTimeForNextNote = midifile.EndTime();
+				for (MidiNote note : track.getNotes()) {
+					if (note.getNumber() == midiNote && note.getStartTime() < currentPulseTime
+							&& note.getStartTime() + note.getDuration() > currentPulseTime
+							&& !pianoPlaying.wasNotePlayed(note)) {
+						Log.d("manager", "yeah " + midiNote);
+						pianoPlaying.correctNotePlayed(note);
+						return;
+					}
+					if (note.getStartTime() > currentPulseTime && note.getStartTime() < pulseTimeForNextNote) {
+						pulseTimeForNextNote = note.getStartTime();
+					}
+				}
+				for (MidiNote note : track.getNotes()) {
+					if (note.getNumber() == midiNote && !pianoPlaying.wasNotePlayed(note)
+							&& note.getStartTime() == pulseTimeForNextNote) {
+						pianoPlaying.correctNotePlayed(note);
+						Log.d("manager", "yeah2 " + midiNote);
+						return;
+					}
+				}
+			}
+			Log.d("manager", "no " + midiNote);
+		}
 	}
 
 	/**
@@ -209,8 +238,20 @@ public class PianoManager {
 			} else if (playState == PlayState.STOP) {
 				return;
 			} else if (playState == PlayState.PAUSE) {
-				Log.d("play", "pause");
 				return;
+			} else if (playState == PlayState.WAIT) {
+				boolean continuePlaying = true;
+				for (MidiNote note : lastChord) {
+					if (!pianoPlaying.wasNotePlayed(note)) {
+						continuePlaying = false;
+					}
+				}
+				if (continuePlaying) {
+					Log.d("manager", "continue");
+					startTime = SystemClock.uptimeMillis();
+					playState = PlayState.PLAY;
+				}
+				timer.postDelayed(TimerCallback, 20);
 			} else if (playState == PlayState.PLAY) {
 				long currentTime = SystemClock.uptimeMillis();
 				currentPulseTime += (currentTime - startTime) * pulsesPerMsec;
@@ -241,10 +282,12 @@ public class PianoManager {
 				case PLAY_ALONG:
 					break;
 				case FOLLOW_YOU:
-					//if()
-					break;
 				case RYTHM_TAP:
-
+					for (MidiNote midiNote : newChord) {
+						if (!pianoPlaying.wasNotePlayed(midiNote)) {
+							playState = PlayState.WAIT;
+						}
+					}
 					break;
 				default:
 					break;
@@ -341,6 +384,8 @@ public class PianoManager {
 			switch (playState) {
 			case PLAY:
 				pianoActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+				pianoPlaying = new PianoPlaying(this, currentPulseTime);
 
 				timer.removeCallbacks(TimerCallback);
 				timer.postDelayed(new Runnable() {
