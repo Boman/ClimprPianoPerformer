@@ -6,7 +6,9 @@
 
     <uses-sdk
         android:minSdkVersion="11"
-        android:targetSdkVersion="18" />
+        android:targetSdkVersion="19" />
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -24,19 +26,23 @@
         </activity>
         <activity android:name="org.climprpiano.SongSettingsActivity" >
         </activity>
-        <activity android:name="org.climprpiano.midisheetmusic.ChooseSongActivity" >
+        <activity android:name="com.midisheetmusic.ChooseSongActivity" >
         </activity>
-        <activity android:name="org.climprpiano.midisheetmusic.FileBrowserActivity" >
+        <activity android:name="com.midisheetmusic.FileBrowserActivity" >
         </activity>
-        <activity android:name="org.climprpiano.midisheetmusic.AllSongsActivity" >
+        <activity android:name="com.midisheetmusic.AllSongsActivity" >
         </activity>
-        <activity android:name="org.climprpiano.midisheetmusic.RecentSongsActivity" >
+        <activity android:name="com.midisheetmusic.RecentSongsActivity" >
         </activity>
         <activity
             android:name="org.climprpiano.HelpActivity"
             android:label="@string/title_activity_help" >
         </activity>
         <activity android:name="org.climprpiano.AboutActivity" >
+        </activity>
+        <activity
+            android:name="org.climprpiano.MidiSettingsActivity"
+            android:label="@string/title_activity_midi_settings" >
         </activity>
     </application>
 

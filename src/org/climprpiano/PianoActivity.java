@@ -10,11 +10,12 @@ import org.climprpiano.PianoManager.HandMode;
 import org.climprpiano.PianoManager.PlayMode;
 import org.climprpiano.PianoManager.PlayState;
 import org.climprpiano.PianoManager.RepeatMode;
-import org.climprpiano.midisheetmusic.ChooseSongActivity;
-import org.climprpiano.midisheetmusic.FileUri;
 import org.climprpiano.util.SystemUiHider;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import com.midisheetmusic.ChooseSongActivity;
+import com.midisheetmusic.FileUri;
 
 import android.app.ActionBar;
 import android.content.Context;

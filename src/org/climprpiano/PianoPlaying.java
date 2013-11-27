@@ -3,7 +3,7 @@ package org.climprpiano;
 import java.util.ArrayList;
 import java.util.Vector;
 
-import org.climprpiano.midisheetmusic.MidiNote;
+import com.midisheetmusic.MidiNote;
 
 import android.util.Log;
 

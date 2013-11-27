@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 
 public class PianoKeyboardView extends View {
@@ -113,7 +114,8 @@ public class PianoKeyboardView extends View {
 
 		keyPositions = calculateKeyPositions(width, keyOffset, numKeys);
 
-		height = 4 * keyPositions[0][2]; // the height is 4x the width of a white key
+		height = (int) ((3 * TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, getResources()
+				.getDisplayMetrics()) + 4 * keyPositions[0][2]) / 4); // the height is calculated 25% from 4x the width of white key and 75% from 40dp
 
 		setMeasuredDimension(width, height);
 		invalidate();

@@ -7,14 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.climprpiano.midisheetmusic.FileUri;
-import org.climprpiano.midisheetmusic.MidiFile;
-import org.climprpiano.midisheetmusic.MidiFileException;
-import org.climprpiano.midisheetmusic.MidiNote;
-import org.climprpiano.midisheetmusic.MidiTrack;
 import org.hexiano.SoundController;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import com.midisheetmusic.FileUri;
+import com.midisheetmusic.MidiFile;
+import com.midisheetmusic.MidiFileException;
+import com.midisheetmusic.MidiNote;
+import com.midisheetmusic.MidiTrack;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -472,13 +473,6 @@ public class PianoManager {
 	}
 
 	/**
-	 * @return the fileUri
-	 */
-	public FileUri getFileUri() {
-		return fileUri;
-	}
-
-	/**
 	 * @param fileUri
 	 *            the fileUri to set
 	 */
@@ -492,6 +486,7 @@ public class PianoManager {
 		byte[] data;
 		try {
 			data = fileUri.getData(pianoActivity);
+			//Log.d("load", data.toString().substring(0, 20));
 			midifile = new MidiFile(data, fileUri.getUri().getLastPathSegment());
 			initOptions();
 		} catch (MidiFileException e) {

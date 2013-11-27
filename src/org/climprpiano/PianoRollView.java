@@ -3,9 +3,6 @@ package org.climprpiano;
 import java.util.Collections;
 import java.util.List;
 
-import org.climprpiano.midisheetmusic.MidiNote;
-import org.climprpiano.midisheetmusic.MidiTrack;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -13,13 +10,15 @@ import android.graphics.Paint;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.animation.AnimationUtils;
+
+import com.midisheetmusic.MidiNote;
+import com.midisheetmusic.MidiTrack;
 
 public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback, OnTouchListener {
 	private PianoManager pianoManager;
@@ -140,18 +139,8 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 		}
 
 		paint.setStyle(Paint.Style.FILL);
-		paint.setColor(Color.rgb(35, 35, 35));
+		paint.setColor(Color.rgb(25, 25, 25));
 		canvas.drawRect(0, 0, width, height, paint);
-
-		// draw vertical grey lines at the position of each black key
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setColor(Color.rgb(20, 20, 20));
-		for (int i = 1; i < keyPositions.length; ++i) {
-			int[] key = keyPositions[i];
-			if (key[0] == PianoKeyboardView.WHITE_KEY && keyPositions[i - 1][0] == PianoKeyboardView.BLACK_KEY) {
-				canvas.drawLine(key[1], 0, key[1], height, paint);
-			}
-		}
 
 		// draw horizontal grey lines at the position of each measure
 		paint.setStyle(Paint.Style.STROKE);
@@ -159,10 +148,20 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 				% (pianoManager.getMidifile().getTime().getMeasure() * pixelsPerPulse); i < height; i += pianoManager
 				.getMidifile().getTime().getMeasure()
 				* pixelsPerPulse) {
-			paint.setColor(Color.rgb(120, 120, 120));
+			paint.setColor(Color.rgb(80, 80, 80));
 			canvas.drawLine(0, (int) i, width, (int) i, paint);
-			paint.setColor(Color.rgb(140, 140, 140));
-			canvas.drawLine(0, (int) i + 1, width, (int) i + 1, paint);
+		}
+
+		// draw vertical grey lines at the position of each black key
+		paint.setStyle(Paint.Style.STROKE);
+		for (int i = 1; i < keyPositions.length; ++i) {
+			int[] key = keyPositions[i];
+			if (key[0] == PianoKeyboardView.WHITE_KEY && keyPositions[i - 1][0] == PianoKeyboardView.BLACK_KEY) {
+				paint.setColor(Color.rgb(120, 120, 120));
+				canvas.drawLine(key[1] - 1, 0, key[1] - 1, height, paint);
+				paint.setColor(Color.rgb(140, 140, 140));
+				canvas.drawLine(key[1], 0, key[1], height, paint);
+			}
 		}
 
 		// draw horizontal red lines at the position of each loop mark
