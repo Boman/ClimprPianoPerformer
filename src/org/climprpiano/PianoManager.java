@@ -34,10 +34,6 @@ public class PianoManager {
 		PLAY_ALONG, FOLLOW_YOU, RYTHM_TAP, LISTEN
 	}
 
-	enum HandMode {
-		LEFT, RIGHT, BOTH
-	}
-
 	enum PlayState {
 		STOP, PLAY, PAUSE, WAIT
 	}
@@ -53,7 +49,6 @@ public class PianoManager {
 
 	// different song settings
 	private PlayMode playMode;
-	private HandMode handMode;
 	private RepeatMode repeatMode;
 
 	// different song variables
@@ -96,7 +91,6 @@ public class PianoManager {
 		setDisplayedKeys(displayFullKeyboard);
 
 		setPlayMode(PlayMode.FOLLOW_YOU);
-		setHandMode(HandMode.BOTH);
 		setRepeatMode(RepeatMode.NONE);
 		setPlayState(PlayState.STOP);
 		setCurrentPulseTime(0);
@@ -351,22 +345,6 @@ public class PianoManager {
 	public void setPlayMode(PlayMode playMode) {
 		this.playMode = playMode;
 		this.pianoActivity.setPlayMode(playMode);
-	}
-
-	/**
-	 * @return the handMode
-	 */
-	public HandMode getHandMode() {
-		return handMode;
-	}
-
-	/**
-	 * @param handMode
-	 *            the handMode to set
-	 */
-	public void setHandMode(HandMode handMode) {
-		this.handMode = handMode;
-		this.pianoActivity.setHandMode(handMode);
 	}
 
 	/**

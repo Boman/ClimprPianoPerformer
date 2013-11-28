@@ -6,16 +6,12 @@ import java.util.List;
 import jp.kshoji.driver.midi.activity.AbstractMultipleMidiActivity;
 import jp.kshoji.driver.midi.device.MidiInputDevice;
 
-import org.climprpiano.PianoManager.HandMode;
 import org.climprpiano.PianoManager.PlayMode;
 import org.climprpiano.PianoManager.PlayState;
 import org.climprpiano.PianoManager.RepeatMode;
 import org.climprpiano.util.SystemUiHider;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import com.midisheetmusic.ChooseSongActivity;
-import com.midisheetmusic.FileUri;
 
 import android.app.ActionBar;
 import android.content.Context;
@@ -32,7 +28,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -44,7 +39,9 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.ToggleButton;
+
+import com.midisheetmusic.ChooseSongActivity;
+import com.midisheetmusic.FileUri;
 
 /**
  * The main activity containing the control elements, their functionality and the setup of midi interface
@@ -64,9 +61,6 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 	private PianoKeyboardView pianoKeyboardView;
 
 	private Spinner playModeSpinner;
-
-	private ToggleButton leftHandCheckbox;
-	private ToggleButton rigthHandCheckbox;
 
 	public static final double SPEED_MULTIPLIER = 2; // the range of maximum speed manipulation (2 => 50%-200%)
 	public static final int SEEK_BAR_DIVIDER = 20; // thenumber of steps of the speed bar
@@ -102,25 +96,17 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 						PianoActivity.this.getResources().getString(R.string.follow_your_playing),
 						PianoActivity.this.getResources().getString(R.string.rhythm_tapping),
 						PianoActivity.this.getResources().getString(R.string.play_strictly) }));
-
-		// functionality of the hand checkboxes
-		leftHandCheckbox = (ToggleButton) findViewById(R.id.checkBoxLeftHand);
-		rigthHandCheckbox = (ToggleButton) findViewById(R.id.checkBoxRightHand);
-		OnClickListener handsChangeListener = new View.OnClickListener() {
-			public void onClick(View v) {
-				if (leftHandCheckbox.isChecked() && rigthHandCheckbox.isChecked()) {
-					pianoManager.setHandMode(HandMode.BOTH);
-				} else if (leftHandCheckbox.isChecked() && !rigthHandCheckbox.isChecked()) {
-					pianoManager.setHandMode(HandMode.LEFT);
-				} else if (!leftHandCheckbox.isChecked() && rigthHandCheckbox.isChecked()) {
-					pianoManager.setHandMode(HandMode.RIGHT);
-				} else if (!leftHandCheckbox.isChecked() && !rigthHandCheckbox.isChecked()) {
-					((ToggleButton) v).setChecked(true);
-				}
+		playModeSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				pianoManager.setPlayMode((new PlayMode[] { PlayMode.LISTEN, PlayMode.FOLLOW_YOU, PlayMode.RYTHM_TAP,
+						PlayMode.PLAY_ALONG })[position]);
 			}
-		};
-		leftHandCheckbox.setOnClickListener(handsChangeListener);
-		rigthHandCheckbox.setOnClickListener(handsChangeListener);
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+			}
+		});
 
 		// functionality of the speedBar
 		speedBar = (SeekBar) findViewById(R.id.seekBarSpeed);
@@ -362,15 +348,6 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 		default:
 			break;
 		}
-	}
-
-	/**
-	 * @param handMode
-	 *            the handMode to set
-	 */
-	public void setHandMode(HandMode handMode) {
-		rigthHandCheckbox.setSelected(handMode == HandMode.BOTH || handMode == HandMode.LEFT);
-		rigthHandCheckbox.setSelected(handMode == HandMode.BOTH || handMode == HandMode.RIGHT);
 	}
 
 	/**

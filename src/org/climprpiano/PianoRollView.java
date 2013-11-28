@@ -148,7 +148,7 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 				% (pianoManager.getMidifile().getTime().getMeasure() * pixelsPerPulse); i < height; i += pianoManager
 				.getMidifile().getTime().getMeasure()
 				* pixelsPerPulse) {
-			paint.setColor(Color.rgb(80, 80, 80));
+			paint.setColor(Color.rgb(40, 40, 40));
 			canvas.drawLine(0, (int) i, width, (int) i, paint);
 		}
 
@@ -157,10 +157,10 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 		for (int i = 1; i < keyPositions.length; ++i) {
 			int[] key = keyPositions[i];
 			if (key[0] == PianoKeyboardView.WHITE_KEY && keyPositions[i - 1][0] == PianoKeyboardView.BLACK_KEY) {
+				paint.setColor(Color.rgb(50, 50, 50));
+				canvas.drawRect(key[1] - 2, 0, key[1], height, paint);
 				paint.setColor(Color.rgb(120, 120, 120));
 				canvas.drawLine(key[1] - 1, 0, key[1] - 1, height, paint);
-				paint.setColor(Color.rgb(140, 140, 140));
-				canvas.drawLine(key[1], 0, key[1], height, paint);
 			}
 		}
 
@@ -243,7 +243,7 @@ public class PianoRollView extends SurfaceView implements SurfaceHolder.Callback
 			scrollTimer.removeCallbacks(flingScroll);
 			startMotionY = (int) event.getY();
 			firstMotionY = startMotionY;
-			touchTimer.postDelayed(TouchTimer, 1500);
+			touchTimer.postDelayed(TouchTimer, 1000);
 			return true;
 		case MotionEvent.ACTION_POINTER_DOWN:
 			numTouches = 2;

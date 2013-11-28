@@ -1,11 +1,9 @@
 package org.climprpiano;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import com.midisheetmusic.MidiNote;
-
-import android.util.Log;
 
 public class PianoPlaying {
 
@@ -42,6 +40,16 @@ public class PianoPlaying {
 				lastNumberNote.NoteOff(pulseTime);
 			}
 		}
+	}
+
+	public List<MidiNote> getCurrentPlayedNotes() {
+		Vector<MidiNote> ret = new Vector<MidiNote>();
+		for (MidiNote playedNote : playedNotes) {
+			if (playedNote.getDuration() == 0) {
+				ret.add(playedNote);
+			}
+		}
+		return ret;
 	}
 
 	public boolean wasNotePlayed(MidiNote midiNote) {

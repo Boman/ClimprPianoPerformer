@@ -156,7 +156,7 @@ public class PianoKeyboardView extends View {
 					canvas.drawRect(key[1], 0, key[2], whiteKeyHeight, paint);
 				} else if (i + keyOffset == MIDDLE_C) {
 					paint.setStyle(Paint.Style.FILL);
-					paint.setColor(Color.rgb(255, 245, 210));
+					paint.setColor(Color.rgb(255, 230, 190));
 					canvas.drawRect(key[1], 0, key[2], whiteKeyHeight, paint);
 				}
 				// draw the grey bottom of the key
