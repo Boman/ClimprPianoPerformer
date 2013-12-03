@@ -39,4 +39,12 @@ public class MidiSettingsActivity extends Activity {
 			}
 		});
 	}
+
+	/**
+	 * When the back button is pressed, update the MidiOptions.
+	 */
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+	}
 }

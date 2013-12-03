@@ -31,7 +31,7 @@ import android.view.WindowManager;
 public class PianoManager {
 
 	enum PlayMode {
-		PLAY_ALONG, FOLLOW_YOU, RYTHM_TAP, LISTEN
+		PLAY_ALONG, FOLLOW_YOU, RYTHM_TAP, LISTEN, NONE
 	}
 
 	enum PlayState {

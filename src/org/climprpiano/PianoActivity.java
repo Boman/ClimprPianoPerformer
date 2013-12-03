@@ -390,7 +390,6 @@ public class PianoActivity extends AbstractMultipleMidiActivity {
 
 	public void updateLatestSongs(FileUri fileUri) {
 		List<FileUri> lastSongs = getLastSongs();
-		lastSongs = lastSongs.subList(0, Math.min(5, lastSongs.size()));
 		if (fileUri != null && !lastSongs.contains(fileUri)) {
 			lastSongs.add(0, fileUri);
 		}
